@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CasaAgraria — Mercadito Digital</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Configuración de colores personalizados de Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agri: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              dark: '#0a3a1f'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f3f6f3;
+      color: #1a2e22;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Ocultar barra de scroll pero permitir desplazamiento horizontal */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="flex justify-center bg-gray-100 min-h-screen">
+
+  <!-- APP CONTAINER (Mobile First Max 450px Max Width Centered) -->
+  <div class="w-full max-w-[450px] bg-emerald-950 text-gray-800 min-h-screen flex flex-col relative shadow-2xl overflow-x-hidden border-x border-emerald-900/10">
+
+    <!-- OVERLAY SELECCIÓN DE ROL / LOGIN -->
+    <div id="roleOverlay" class="fixed inset-0 z-50 bg-emerald-950/95 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-emerald-100 my-auto overflow-y-auto max-h-[95vh]">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+            <i data-lucide="sprout" class="w-9 h-9"></i>
+          </div>
+          <h1 class="text-2xl font-extrabold text-emerald-950">CasaAgraria</h1>
+          <p class="text-xs text-emerald-600 font-semibold uppercase tracking-wider mt-0.5">Mercadito Digital</p>
+        </div>
+
+        <p class="text-sm text-gray-600 text-center mb-5">Ingresa tus datos para acceder a tu panel personalizado</p>
+
+        <form id="roleForm" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Nombre o Finca / Negocio</label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 absolute left-3 top-3.5 text-gray-400"></i>
+              <input type="text" id="accountName" required placeholder="Ej. Finca El Paraíso" class="w-full pl-9 pr-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Contraseña</label>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-3.5 text-gray-400"></i>
+              <input type="password" id="accountPassword" required placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <label class="block text-xs font-bold text-gray-700 mb-2">Selecciona tu Rol Principal</label>
+            <div class="grid grid-cols-1 gap-3">
+              <button type="button" onclick="selectRole('productor')" id="btnRoleProducer" class="flex items-center p-3.5 border-2 border-emerald-600 bg-emerald-50/50 rounded-2xl text-left hover:border-emerald-600 transition group focus:outline-none">
+                <div class="w-11 h-11 bg-emerald-600 text-white rounded-xl flex items-center justify-center shrink-0 mr-3 shadow-md group-hover:scale-105 transition">
+                  <i data-lucide="tractor" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-emerald-950 flex items-center gap-1.5">
+                    Productor agropecuario
+                    <i data-lucide="check-circle-2" id="iconCheckProducer" class="w-4 h-4 text-emerald-600"></i>
+                  </div>
+                  <div class="text-xs text-gray-500 leading-tight mt-0.5">Vende cosechas, consulta precios, financia insumos y gestiona ventas.</div>
+                </div>
+              </button>
+
+              <button type="button" onclick="selectRole('restaurante')" id="btnRoleRestaurant" class="flex items-center p-3.5 border-2 border-gray-200 bg-white rounded-2xl text-left hover:border-emerald-300 transition group focus:outline-none">
+                <div class="w-11 h-11 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center shrink-0 mr-3 group-hover:scale-105 transition">
+                  <i data-lucide="utensils" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
+                    Restaurante / Comprador
+                    <i data-lucide="check-circle-2" id="iconCheckRestaurant" class="w-4 h-4 text-emerald-600 hidden"></i>
+                  </div>
+                  <div class="text-xs text-gray-500 leading-tight mt-0.5">Compra insumos frescos del campo sin intermediarios y rastrea pedidos.</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition duration-200 flex items-center justify-center gap-2">
+            <span>Ingresar a CasaAgraria</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MAIN APP CANVAS BODY -->
+    <div class="flex-1 bg-gray-50 pb-24 flex flex-col min-h-screen">
+      
+      <!-- TOP HEADER PERSISTENTE -->
+      <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 px-5 py-3.5 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 bg-emerald-700 text-white rounded-xl flex items-center justify-center shadow-md">
+            <i data-lucide="sprout" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="font-black text-emerald-950 text-base tracking-tight leading-none block">CasaAgraria</span>
+            <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest block mt-0.5">Mercadito Digital</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="toast('No tienes notificaciones pendientes', 'info')" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl flex items-center justify-center transition relative">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+          </button>
+          <div id="roleBadge" class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+            Productor
+          </div>
+        </div>
+      </header>
+
+      <!-- SECCIONES / PANTALLAS PRINCIPALES -->
+      <main class="flex-1 px-4 py-4 space-y-4">
+
+        <!-- 1. INICIO / DASHBOARD -->
+        <section id="screen-inicio" class="app-screen space-y-4">
+          <!-- Banner Bienvenida -->
+          <div class="bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900 text-white rounded-3xl p-5 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 opacity-10 text-white pointer-events-none">
+              <i data-lucide="sprout" class="w-48 h-48"></i>
+            </div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-emerald-100">
+                  Panel Principal
+                </span>
+                <span id="liveClock" class="text-xs font-mono text-emerald-200">12:00:00</span>
+              </div>
+              <h2 id="homeGreeting" class="text-2xl font-black text-white leading-tight">¡Hola, Finca El Paraíso! 👋</h2>
+              <p id="homeSubtext" class="text-xs text-emerald-100/90 mt-1 max-w-[280px]">Conecta tu producción directa con mercados mayoristas y restaurantes.</p>
+            </div>
+          </div>
+
+          <!-- Billetera / Resumen Financiero -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+            <div class="flex justify-between items-center text-xs text-gray-500 font-medium">
+              <span class="flex items-center gap-1.5"><i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i> Cosecha a Futuro</span>
+              <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">+2.0% E.A.</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <div>
+                <span class="text-xs text-gray-400 font-semibold block">Saldo Disponible</span>
+                <span id="homeBalance" class="text-2xl font-black text-gray-900">$2.350.000</span>
+              </div>
+              <button onclick="switchScreen('finanzas')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-xl transition">
+                Gestionar <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Acceso Rápido Agro-Impulso Crédito -->
+          <div id="creditWidget" class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center shadow-md shrink-0">
+                <i data-lucide="badge-percent" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-extrabold text-amber-950 uppercase tracking-wider">Crédito Agro-Impulso</h4>
+                <p class="text-xs text-amber-800 font-medium">Financia insumos desde 2.42% mensual</p>
+              </div>
+            </div>
+            <button onclick="switchScreen('credito')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm shrink-0">
+              Simular
+            </button>
+          </div>
+
+          <!-- Accesos Rápidos Grid -->
+          <div>
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">Herramientas & Servicios</h3>
+            <div class="grid grid-cols-4 gap-2.5">
+              <button onclick="switchScreen('mercadito')" class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:border-emerald-300 transition text-center flex flex-col items-center gap-1.5 group">
+                <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <i data-lucide="store" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold text-gray-700 leading-tight" id="quickNavMarket">Mercadito</span>
+              </button>
+
+              <button onclick="switchScreen('precios')" class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:border-emerald-300 transition text-center flex flex-col items-center gap-1.5 group">
+                <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold text-gray-700 leading-tight">Precios</span>
+              </button>
+
+              <button onclick="switchScreen('analisis')" class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:border-emerald-300 transition text-center flex flex-col items-center gap-1.5 group">
+                <div class="w-10 h-10 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <i data-lucide="bot" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold text-gray-700 leading-tight">Asistente IA</span>
+              </button>
+
+              <button onclick="switchScreen('calculadora')" class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:border-emerald-300 transition text-center flex flex-col items-center gap-1.5 group">
+                <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <i data-lucide="calculator" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold text-gray-700 leading-tight">Calculadora</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Actividad Reciente / Pedidos Activos -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-emerald-600"></i> Pedidos Recientes
+              </h3>
+              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">2 Activos</span>
+            </div>
+            
+            <div class="divide-y divide-gray-100 text-xs">
+              <div class="py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-emerald-50 text-emerald-700 rounded-lg flex items-center justify-center font-bold">🥔</div>
+                  <div>
+                    <div class="font-bold text-gray-800">Restaurante La Huerta</div>
+                    <div class="text-gray-400">Papa Pastusa · 50 kg · $67.500</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Confirmado</span>
+              </div>
+
+              <div class="py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-red-50 text-red-700 rounded-lg flex items-center justify-center font-bold">🍅</div>
+                  <div>
+                    <div class="font-bold text-gray-800">Sabores del Campo</div>
+                    <div class="text-gray-400">Tomate Chonto · 30 kg · $64.500</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md">En Camino</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. MERCADITO / COMPRAS -->
+        <section id="screen-mercadito" class="app-screen space-y-4 hidden">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 id="marketTitle" class="text-xl font-extrabold text-gray-900">Mercadito Digital</h2>
+              <p id="marketSub" class="text-xs text-gray-500">Publica o explora productos directamente del campo</p>
+            </div>
+            <button id="btnOpenPublishModal" onclick="openModal('publishModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="plus" class="w-4 h-4"></i> Publicar
+            </button>
+          </div>
+
+          <!-- Buscador y Filtros -->
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-gray-400"></i>
+            <input type="text" id="marketSearch" oninput="filterMarketProducts()" placeholder="Buscar papa, tomate, aguacate..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+          </div>
+
+          <!-- Catálogo de Productos -->
+          <div id="marketProductsList" class="space-y-3">
+            <!-- Renderizado Dinámico con JS -->
+          </div>
+        </section>
+
+        <!-- 3. PRECIOS AGRÍCOLAS -->
+        <section id="screen-precios" class="app-screen space-y-4 hidden">
+          <div>
+            <h2 class="text-xl font-extrabold text-gray-900">Precios Agrícolas en Vivo</h2>
+            <p class="text-xs text-gray-500">Referencial de centrales mayoristas de Bogotá y Boyacá</p>
+          </div>
+
+          <!-- Selector de Plaza Mayorista -->
+          <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-gray-700 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i> Plaza Referencia:
+              </span>
+              <span class="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Actualizado
+              </span>
+            </div>
+            <select id="marketSelect" onchange="filterPrices()" class="w-full bg-gray-50 border border-gray-200 text-xs font-bold rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="bogota">Corabastos — Bogotá D.C.</option>
+              <option value="boyaca">Central Mayorista de Boyacá (Tunja)</option>
+            </select>
+          </div>
+
+          <!-- Buscador de Precios -->
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-gray-400"></i>
+            <input type="text" id="priceSearch" oninput="filterPrices()" placeholder="🔎 Buscar hortaliza, fruta o tubérculo..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+          </div>
+
+          <!-- Lista de Precios en Tarjetas -->
+          <div id="pricesCardList" class="space-y-2.5">
+            <!-- Dinámico -->
+          </div>
+
+          <!-- Tabla Resumen Más Vendidos -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Top Tendencias de Mercado</h3>
+              <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">Semanal</span>
+            </div>
+            
+            <div class="overflow-x-auto no-scrollbar">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-gray-100 text-gray-400 font-semibold">
+                    <th class="pb-2">Producto</th>
+                    <th class="pb-2">Precio/kg</th>
+                    <th class="pb-2 text-right">Variación</th>
+                  </tr>
+                </thead>
+                <tbody id="topPricesTable" class="divide-y divide-gray-50 font-medium">
+                  <!-- Dinámico -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Gráfico Ilustrativo de Tendencias -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+            <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Evolución Promedio del Mercado</h3>
+            <div class="h-32 flex items-end justify-between gap-2 pt-4 pb-2 border-b border-gray-100">
+              <div class="flex-1 bg-emerald-200 hover:bg-emerald-500 rounded-t-lg transition relative group" style="height: 55%;">
+                <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-500 opacity-0 group-hover:opacity-100">$1.8k</span>
+              </div>
+              <div class="flex-1 bg-emerald-300 hover:bg-emerald-500 rounded-t-lg transition relative group" style="height: 70%;">
+                <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-500 opacity-0 group-hover:opacity-100">$2.1k</span>
+              </div>
+              <div class="flex-1 bg-emerald-200 hover:bg-emerald-500 rounded-t-lg transition relative group" style="height: 62%;">
+                <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-500 opacity-0 group-hover:opacity-100">$1.9k</span>
+              </div>
+              <div class="flex-1 bg-emerald-400 hover:bg-emerald-500 rounded-t-lg transition relative group" style="height: 85%;">
+                <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-500 opacity-0 group-hover:opacity-100">$2.4k</span>
+              </div>
+              <div class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-t-lg transition relative group" style="height: 78%;">
+                <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-500 opacity-0 group-hover:opacity-100">$2.2k</span>
+              </div>
+            </div>
+            <div class="flex justify-between text-[10px] text-gray-400 font-bold px-1">
+              <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Hoy</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. AGRO-IMPULSO CRÉDITO -->
+        <section id="screen-credito" class="app-screen space-y-4 hidden">
+          <div>
+            <h2 class="text-xl font-extrabold text-gray-900">Crédito Agro-Impulso</h2>
+            <p class="text-xs text-gray-500">Financiamiento a tu medida para insumos y maquinaria</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Simulador de Cuota Mensual</h3>
+
+            <div>
+              <div class="flex justify-between text-xs font-bold text-gray-700 mb-1">
+                <span>Monto a solicitar:</span>
+                <span id="creditAmountLabel" class="text-emerald-700 font-black text-sm">$8.000.000</span>
+              </div>
+              <input type="range" id="creditAmount" min="1000000" max="20000000" step="500000" value="8000000" oninput="calculateCredit()" class="w-full accent-emerald-600 h-2 bg-gray-200 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[10px] text-gray-400 font-bold mt-1">
+                <span>$1.000.000</span>
+                <span>$20.000.000</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Plazo de Pago (Meses)</label>
+              <select id="creditTerm" onchange="calculateCredit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="6">6 Meses</option>
+                <option value="12">12 Meses</option>
+                <option value="24" selected>24 Meses</option>
+                <option value="36">36 Meses</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100">
+                <span class="text-[10px] font-bold text-emerald-800 uppercase block">Tasa Mensual</span>
+                <span class="text-base font-extrabold text-emerald-950">2.42%</span>
+                <span class="text-[9px] text-emerald-600 block">33.24% E.A.</span>
+              </div>
+              <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-100">
+                <span class="text-[10px] font-bold text-amber-800 uppercase block">Interés de Mora</span>
+                <span class="text-base font-extrabold text-amber-950">3.06%</span>
+                <span class="text-[9px] text-amber-600 block">36.76% Anual</span>
+              </div>
+            </div>
+
+            <div class="bg-emerald-900 text-white rounded-2xl p-4 shadow-md space-y-1">
+              <span class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Cuota Mensual Estimada</span>
+              <div id="creditPayment" class="text-2xl font-black">$443.492</div>
+              <p class="text-[10px] text-emerald-200/80">Incluye capital e intereses fijos durante el periodo elegido.</p>
+            </div>
+
+            <button onclick="toast('Solicitud pre-aprobada registrada', 'success')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-xs flex items-center justify-center gap-2">
+              <span>Solicitar Crédito Ahora</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </section>
+
+        <!-- 5. FINANZAS / COSECHA A FUTURO -->
+        <section id="screen-finanzas" class="app-screen space-y-4 hidden">
+          <div>
+            <h2 class="text-xl font-extrabold text-gray-900">Billetera Cosecha a Futuro</h2>
+            <p class="text-xs text-gray-500">Ahorra e invierte las ganancias de tus cosechas</p>
+          </div>
+
+          <div class="bg-emerald-800 text-white rounded-3xl p-5 shadow-xl space-y-3">
+            <span class="text-xs text-emerald-200 font-medium block">Saldo en Bóveda Agrícola</span>
+            <div class="text-3xl font-black tracking-tight" id="walletBalance">$2.350.000</div>
+            <div class="flex items-center gap-2 text-xs text-emerald-200">
+              <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Rendimiento del 2% E.A. activo
+            </div>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2">
+            <button onclick="toast('Función de Depósito activada', 'info')" class="bg-white p-3 rounded-2xl border border-gray-100 text-center hover:border-emerald-300 transition shadow-sm">
+              <div class="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mx-auto mb-1">
+                <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold text-gray-700">Depositar</span>
+            </button>
+
+            <button onclick="toast('Función de Retiro activada', 'info')" class="bg-white p-3 rounded-2xl border border-gray-100 text-center hover:border-emerald-300 transition shadow-sm">
+              <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center mx-auto mb-1">
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold text-gray-700">Retirar</span>
+            </button>
+
+            <button onclick="toast('Transferencias sin costo entre cuentas CasaAgraria', 'info')" class="bg-white p-3 rounded-2xl border border-gray-100 text-center hover:border-emerald-300 transition shadow-sm">
+              <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center mx-auto mb-1">
+                <i data-lucide="repeat" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold text-gray-700">Transferir</span>
+            </button>
+
+            <button onclick="toast('Ahorro programado activado para próxima siembra', 'success')" class="bg-white p-3 rounded-2xl border border-gray-100 text-center hover:border-emerald-300 transition shadow-sm">
+              <div class="w-8 h-8 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center mx-auto mb-1">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold text-gray-700">Reservar</span>
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Historial de Movimientos</h3>
+            <div class="divide-y divide-gray-100 text-xs">
+              <div class="py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-xs">+</div>
+                  <div>
+                    <div class="font-bold text-gray-800">Pago Restaurante La Huerta</div>
+                    <div class="text-gray-400 text-[10px]">Ayer · Venta de Papa</div>
+                  </div>
+                </div>
+                <span class="font-extrabold text-emerald-600">+$850.000</span>
+              </div>
+
+              <div class="py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-xs">+</div>
+                  <div>
+                    <div class="font-bold text-gray-800">Abono Sabores del Campo</div>
+                    <div class="text-gray-400 text-[10px]">Hace 3 días · Tomate</div>
+                  </div>
+                </div>
+                <span class="font-extrabold text-emerald-600">+$420.000</span>
+              </div>
+
+              <div class="py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 bg-red-100 text-red-700 rounded-full flex items-center justify-center font-bold text-xs">-</div>
+                  <div>
+                    <div class="font-bold text-gray-800">Retiro a Cuenta Bancaria</div>
+                    <div class="text-gray-400 text-[10px]">Hace 5 días</div>
+                  </div>
+                </div>
+                <span class="font-extrabold text-red-600">-$200.000</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. CALCULADORA DE OPERACIÓN -->
+        <section id="screen-calculadora" class="app-screen space-y-4 hidden">
+          <div>
+            <h2 class="text-xl font-extrabold text-gray-900">Calculadora Agrícola</h2>
+            <p class="text-xs text-gray-500">Calcula costos, comisiones de transporte e ingreso neto del productor</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Producto</label>
+              <select id="calcProduct" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="Mangostino">Mangostino</option>
+                <option value="Papa Pastusa">Papa Pastusa</option>
+                <option value="Tomate Chonto">Tomate Chonto</option>
+                <option value="Aguacate Hass">Aguacate Hass</option>
+                <option value="Mango Tommy">Mango Tommy</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Cantidad (kg)</label>
+                <input type="number" id="calcQty" value="100" min="1" oninput="calculateOperationPrice()" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Precio por kg ($)</label>
+                <input type="number" id="calcUnitPrice" value="6500" min="0" oninput="calculateOperationPrice()" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Interés o Recargo Comercial (%)</label>
+              <input type="number" id="calcInterest" value="0" min="0" step="0.5" oninput="calculateOperationPrice()" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200/80 space-y-2 pt-3">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-500">Valor Base Operación:</span>
+                <span id="calcBaseVal" class="font-bold text-gray-800">$650.000</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-500">Recargo / Interés:</span>
+                <span id="calcInterestVal" class="font-bold text-gray-800">$0</span>
+              </div>
+              <div class="flex justify-between text-sm font-extrabold border-t border-gray-200 pt-2 text-gray-900">
+                <span>Total Bruto Comprador:</span>
+                <span id="calcTotalVal" class="text-emerald-700">$650.000</span>
+              </div>
+            </div>
+
+            <!-- Desglose de Tarifas -->
+            <div class="border-t border-gray-100 pt-3 space-y-2">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Desglose de Comisiones del Modelo</h4>
+              
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-amber-50/60 p-2.5 rounded-xl border border-amber-100">
+                  <span class="text-[10px] text-amber-800 font-bold block">Logística Transporte (18%)</span>
+                  <span id="calcTransportVal" class="font-extrabold text-amber-950">$117.000</span>
+                </div>
+
+                <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100">
+                  <span class="text-[10px] text-blue-800 font-bold block">Contacto Comercial (10%)</span>
+                  <span id="calcContactVal" class="font-extrabold text-blue-950">$65.000</span>
+                </div>
+              </div>
+
+              <div class="bg-emerald-900 text-white p-3.5 rounded-xl flex justify-between items-center shadow-md">
+                <div>
+                  <span class="text-[10px] text-emerald-300 font-bold uppercase block">Ingreso Neto para el Productor</span>
+                  <span id="calcProducerVal" class="text-lg font-black">$468.000</span>
+                </div>
+                <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400"></i>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. ASISTENTE AGRÍCOLA IA -->
+        <section id="screen-analisis" class="app-screen space-y-4 hidden">
+          <div>
+            <h2 class="text-xl font-extrabold text-gray-900">Asistente Agrícola IA 🤖</h2>
+            <p class="text-xs text-gray-500">Estimación inteligente de margen, costos y precio óptimo de venta</p>
+          </div>
+
+          <div class="bg-gradient-to-br from-purple-900 to-indigo-900 text-white rounded-2xl p-5 shadow-lg space-y-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-purple-300 animate-pulse"></i>
+              <h3 class="text-sm font-bold">Simulador de Inteligencia de Mercado</h3>
+            </div>
+            <p class="text-xs text-purple-200">Añade los productos de tu lote para calcular el precio recomendado según el margen deseado.</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Lote de Productos</h4>
+              <button onclick="addAIProductRow()" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar
+              </button>
+            </div>
+
+            <div id="aiProductsContainer" class="space-y-2">
+              <!-- Dinámico -->
+            </div>
+
+            <div class="pt-2">
+              <label class="block text-xs font-bold text-gray-700 mb-1">Margen Objetivo del Productor (%)</label>
+              <input type="number" id="aiMarginRate" value="15" min="0" max="100" oninput="runAIEstimation()" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+
+            <button onclick="runAIEstimation()" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 rounded-xl shadow-md transition text-xs flex items-center justify-center gap-2">
+              <i data-lucide="cpu" class="w-4 h-4"></i>
+              <span>Calcular con IA</span>
+            </button>
+          </div>
+
+          <!-- Resultados IA -->
+          <div id="aiResultsCard" class="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 space-y-3">
+            <!-- Dinámico -->
+          </div>
+        </section>
+
+        <!-- 8. PERFIL Y CONFIGURACIÓN -->
+        <section id="screen-perfil" class="app-screen space-y-4 hidden">
+          <div>
+            <h2 class="text-xl font-extrabold text-gray-900">Perfil de Usuario</h2>
+            <p class="text-xs text-gray-500">Administra los datos de tu finca o negocio agrícola</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4 text-center">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-3xl flex items-center justify-center mx-auto text-3xl font-black shadow-inner">
+              <span id="profileAvatarIcon">👨‍🌾</span>
+            </div>
+            <div>
+              <h3 id="profileAccountDisplay" class="text-lg font-black text-gray-900">Finca El Paraíso</h3>
+              <span id="profileTypeDisplay" class="inline-block text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 mt-1">Productor Agropecuario</span>
+            </div>
+          </div>
+
+          <form id="profileForm" onsubmit="saveProfile(event)" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-3">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Información de Contacto y Ubicación</h4>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Nombre de la Cuenta / Finca</label>
+              <input type="text" id="profAccountName" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Responsable Principal</label>
+              <input type="text" id="profResponsible" placeholder="Ej. Juan Pérez" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Teléfono</label>
+                <input type="tel" id="profPhone" placeholder="300 000 0000" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Departamento / Zona</label>
+                <input type="text" id="profLocation" placeholder="Ej. Boyacá" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Especialidad o Cultivos Principales</label>
+              <input type="text" id="profActivity" placeholder="Ej. Producción de Frutas y Tubérculos" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow-md transition text-xs flex items-center justify-center gap-2 mt-2">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Guardar Perfil</span>
+            </button>
+          </form>
+
+          <div class="space-y-2">
+            <button onclick="switchRoleModal()" class="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-xl border border-gray-200 transition text-xs flex items-center justify-center gap-2">
+              <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-600"></i>
+              <span>Cambiar Rol de Usuario</span>
+            </button>
+
+            <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl border border-red-100 transition text-xs flex items-center justify-center gap-2">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- BARRA DE NAVEGACIÓN INFERIOR PERSISTENTE (Mobile Navigation) -->
+      <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-3 py-2 z-40 grid grid-cols-5 gap-1 shadow-lg">
+        <button onclick="switchScreen('inicio')" id="nav-inicio" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-emerald-700 font-bold transition">
+          <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+          <span class="text-[10px]">Inicio</span>
+        </button>
+
+        <button onclick="switchScreen('mercadito')" id="nav-mercadito" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-gray-400 font-medium hover:text-emerald-600 transition">
+          <i data-lucide="shopping-bag" class="w-5 h-5 mb-0.5"></i>
+          <span id="navLabelMarket" class="text-[10px]">Mercadito</span>
+        </button>
+
+        <button onclick="switchScreen('precios')" id="nav-precios" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-gray-400 font-medium hover:text-emerald-600 transition">
+          <i data-lucide="trending-up" class="w-5 h-5 mb-0.5"></i>
+          <span class="text-[10px]">Precios</span>
+        </button>
+
+        <button onclick="switchScreen('finanzas')" id="nav-finanzas" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-gray-400 font-medium hover:text-emerald-600 transition">
+          <i data-lucide="wallet" class="w-5 h-5 mb-0.5"></i>
+          <span id="navLabelFinances" class="text-[10px]">Finanzas</span>
+        </button>
+
+        <button onclick="switchScreen('perfil')" id="nav-perfil" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-gray-400 font-medium hover:text-emerald-600 transition">
+          <i data-lucide="user" class="w-5 h-5 mb-0.5"></i>
+          <span class="text-[10px]">Perfil</span>
+        </button>
+      </nav>
+
+    </div>
+  </div>
+
+  <!-- MODAL PUBLICAR PRODUCTO -->
+  <div id="publishModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+        <h3 class="text-base font-extrabold text-gray-900">Publicar Producto Agrícola</h3>
+        <button onclick="closeModal('publishModal')" class="text-gray-400 hover:text-gray-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handlePublishProduct(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Nombre del Producto</label>
+          <input type="text" id="pubName" required placeholder="Ej. Mangostino Seleccionado" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Precio / kg ($)</label>
+            <input type="number" id="pubPrice" required placeholder="6500" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Cantidad (kg)</label>
+            <input type="number" id="pubQty" required placeholder="100" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Categoría / Emoji Icono</label>
+          <select id="pubEmoji" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="🟣">🟣 Frutas Especiales (Mangostino, Gulupa)</option>
+            <option value="🥔">🥔 Tubérculos (Papa, Yuca)</option>
+            <option value="🍅">🍅 Hortalizas (Tomate, Cebolla)</option>
+            <option value="🥑">🥑 Aguacate & Frutales</option>
+          </select>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-xs mt-2">
+          Publicar en el Mercadito
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIÓN -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i data-lucide="info" id="toastIcon" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">Mensaje de prueba</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC & STATE -->
+  <script>
+    // ESTADO GLOBAL DE LA APLICACIÓN
+    let state = {
+      role: localStorage.getItem('casaAgraria_role') || 'productor',
+      accountName: localStorage.getItem('casaAgraria_accountName') || '',
+      password: localStorage.getItem('casaAgraria_password') || '',
+      profile: JSON.parse(localStorage.getItem('casaAgraria_profile') || '{}'),
+      selectedRoleTemp: 'productor',
+      aiProducts: [
+        { name: 'Mangostino', qty: 100, price: 6500 },
+        { name: 'Papa Pastusa', qty: 200, price: 1350 }
+      ]
+    };
+
+    // DATOS DE PRECIOS AGRÍCOLAS MAYORISTAS
+    const marketPricesData = {
+      bogota: [
+        { name: 'Papa Pastusa', price: 1350, change: 3.2, emoji: '🥔', unit: 'kg' },
+        { name: 'Tomate Chonto', price: 2150, change: -1.5, emoji: '🍅', unit: 'kg' },
+        { name: 'Cebolla Cabezona', price: 1600, change: 2.1, emoji: '🧅', unit: 'kg' },
+        { name: 'Zanahoria', price: 1200, change: -0.8, emoji: '🥕', unit: 'kg' },
+        { name: 'Plátano Hartón', price: 1850, change: 4.0, emoji: '🍌', unit: 'kg' },
+        { name: 'Mangostino', price: 6500, change: 5.4, emoji: '🟣', unit: 'kg' },
+        { name: 'Aguacate Hass', price: 7200, change: -2.1, emoji: '🥑', unit: 'kg' },
+        { name: 'Yuca', price: 1800, change: 1.7, emoji: '🌱', unit: 'kg' }
+      ],
+      boyaca: [
+        { name: 'Papa Pastusa', price: 1280, change: 2.5, emoji: '🥔', unit: 'kg' },
+        { name: 'Tomate Chonto', price: 2050, change: -2.0, emoji: '🍅', unit: 'kg' },
+        { name: 'Cebolla Cabezona', price: 1550, change: 1.8, emoji: '🧅', unit: 'kg' },
+        { name: 'Zanahoria', price: 1100, change: -1.2, emoji: '🥕', unit: 'kg' },
+        { name: 'Plátano Hartón', price: 1900, change: 3.2, emoji: '🍌', unit: 'kg' },
+        { name: 'Mangostino', price: 6300, change: 4.8, emoji: '🟣', unit: 'kg' }
+      ]
+    };
+
+    // PRODUCTOS DEL MERCADITO
+    let marketProducts = [
+      { id: 1, name: 'Papa Pastusa Limpia', price: 1350, qty: 500, seller: 'Finca El Paraíso', emoji: '🥔', rating: 4.9 },
+      { id: 2, name: 'Tomate Chonto de Invernadero', price: 2150, qty: 300, seller: 'Cultivos del Valle', emoji: '🍅', rating: 4.8 },
+      { id: 3, name: 'Mangostino Tipo Exportación', price: 6500, qty: 150, seller: 'AgroFrutas Boyacá', emoji: '🟣', rating: 5.0 },
+      { id: 4, name: 'Aguacate Hass Maduro', price: 7200, qty: 200, seller: 'Finca San José', emoji: '🥑', rating: 4.7 }
+    ];
+
+    // INICIALIZACIÓN AL CARGAR LA PÁGINA
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      startLiveClock();
+
+      if (state.accountName && state.role) {
+        document.getElementById('roleOverlay').classList.add('hidden');
+        applyRoleTheme();
+      } else {
+        document.getElementById('roleOverlay').classList.remove('hidden');
+      }
+
+      renderPrices();
+      renderMarketProducts();
+      calculateCredit();
+      calculateOperationPrice();
+      renderAIProducts();
+      runAIEstimation();
+      loadProfileToForm();
+    });
+
+    // RELOJ EN VIVO
+    function startLiveClock() {
+      setInterval(() => {
+        const now = new Date();
+        const clockEl = document.getElementById('liveClock');
+        if (clockEl) clockEl.textContent = now.toLocaleTimeString('es-CO');
+      }, 1000);
+    }
+
+    // SELECCIÓN DE ROL EN EL OVERLAY
+    function selectRole(role) {
+      state.selectedRoleTemp = role;
+      const isProducer = role === 'productor';
+      
+      document.getElementById('btnRoleProducer').className = isProducer 
+        ? 'flex items-center p-3.5 border-2 border-emerald-600 bg-emerald-50/50 rounded-2xl text-left transition group focus:outline-none'
+        : 'flex items-center p-3.5 border-2 border-gray-200 bg-white rounded-2xl text-left hover:border-emerald-300 transition group focus:outline-none';
+
+      document.getElementById('btnRoleRestaurant').className = !isProducer 
+        ? 'flex items-center p-3.5 border-2 border-emerald-600 bg-emerald-50/50 rounded-2xl text-left transition group focus:outline-none'
+        : 'flex items-center p-3.5 border-2 border-gray-200 bg-white rounded-2xl text-left hover:border-emerald-300 transition group focus:outline-none';
+
+      document.getElementById('iconCheckProducer').classList.toggle('hidden', !isProducer);
+      document.getElementById('iconCheckRestaurant').classList.toggle('hidden', isProducer);
+    }
+
+    // LOGIN Y GUARDADO DE CREDENCIALES
+    function handleLogin(e) {
+      e.preventDefault();
+      const name = document.getElementById('accountName').value.trim();
+      const pass = document.getElementById('accountPassword').value.trim();
+
+      if (!name || !pass) {
+        toast('Por favor completa todos los campos', 'error');
+        return;
+      }
+
+      state.accountName = name;
+      state.password = pass;
+      state.role = state.selectedRoleTemp;
+
+      localStorage.setItem('casaAgraria_accountName', name);
+      localStorage.setItem('casaAgraria_password', pass);
+      localStorage.setItem('casaAgraria_role', state.role);
+
+      document.getElementById('roleOverlay').classList.add('hidden');
+      applyRoleTheme();
+      toast(`¡Bienvenido, ${name}!`, 'success');
+    }
+
+    // APLICAR ROL Y TEMATIZAR VISTAS
+    function applyRoleTheme() {
+      const isProducer = state.role === 'productor';
+      const name = state.accountName || 'Usuario';
+
+      // Textos del Dashboard
+      document.getElementById('roleBadge').textContent = isProducer ? 'Productor' : 'Restaurante';
+      document.getElementById('homeGreeting').textContent = `¡Hola, ${name}! 👋`;
+      document.getElementById('homeSubtext').textContent = isProducer 
+        ? 'Conecta tu producción directa con mercados mayoristas y restaurantes.'
+        : 'Compra insumos agrícolas frescos directo del campo sin intermediarios.';
+
+      // Navegación Inferior Adaptativa
+      document.getElementById('navLabelMarket').textContent = isProducer ? 'Mercadito' : 'Compras';
+      document.getElementById('navLabelFinances').textContent = isProducer ? 'Finanzas' : 'Pedidos';
+      document.getElementById('quickNavMarket').textContent = isProducer ? 'Mercadito' : 'Comprar';
+
+      // Perfil
+      document.getElementById('profileAccountDisplay').textContent = name;
+      document.getElementById('profileTypeDisplay').textContent = isProducer ? 'Productor Agropecuario' : 'Restaurante / Comprador';
+      document.getElementById('profileAvatarIcon').textContent = isProducer ? '👨‍🌾' : '🍽️';
+
+      document.getElementById('profAccountName').value = name;
+    }
+
+    // CAMBIO DE PANTALLAS (TAB NAVIGATION)
+    function switchScreen(screenId) {
+      document.querySelectorAll('.app-screen').forEach(s => s.classList.add('hidden'));
+      const activeScreen = document.getElementById(`screen-${screenId}`);
+      if (activeScreen) activeScreen.classList.remove('hidden');
+
+      // Actualizar estilo del Navbar Inferior
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.className = 'nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-gray-400 font-medium hover:text-emerald-600 transition';
+      });
+
+      const activeNav = document.getElementById(`nav-${screenId}`);
+      if (activeNav) {
+        activeNav.className = 'nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-emerald-700 font-bold transition';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // RENDERIZAR PRECIOS AGRÍCOLAS
+    function renderPrices() {
+      const plaza = document.getElementById('marketSelect')?.value || 'bogota';
+      const query = document.getElementById('priceSearch')?.value.toLowerCase() || '';
+      const list = marketPricesData[plaza].filter(item => item.name.toLowerCase().includes(query));
+
+      const container = document.getElementById('pricesCardList');
+      if (!container) return;
+
+      container.innerHTML = list.map(item => `
+        <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center font-bold text-xl">
+              ${item.emoji}
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-gray-900">${item.name}</h4>
+              <span class="text-xs text-gray-400 font-semibold">$${item.price.toLocaleString('es-CO')} / ${item.unit}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-extrabold ${item.change >= 0 ? 'text-emerald-600' : 'text-red-500'}">
+              ${item.change >= 0 ? '▲ +' : '▼ '}${item.change}%
+            </span>
+            <span class="text-[9px] text-gray-400 block font-medium">vs ayer</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Render Tabla Top Tendencias
+      const topTable = document.getElementById('topPricesTable');
+      if (topTable) {
+        topTable.innerHTML = marketPricesData[plaza].slice(0, 5).map(item => `
+          <tr class="border-b border-gray-50">
+            <td class="py-2 flex items-center gap-2">
+              <span>${item.emoji}</span>
+              <span class="font-bold text-gray-800">${item.name}</span>
+            </td>
+            <td class="py-2 text-gray-600 font-bold">$${item.price.toLocaleString('es-CO')}</td>
+            <td class="py-2 text-right font-bold ${item.change >= 0 ? 'text-emerald-600' : 'text-red-500'}">
+              ${item.change >= 0 ? '+' : ''}${item.change}%
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function filterPrices() {
+      renderPrices();
+    }
+
+    // RENDERIZAR PRODUCTOS DEL MERCADITO
+    function renderMarketProducts() {
+      const query = document.getElementById('marketSearch')?.value.toLowerCase() || '';
+      const list = marketProducts.filter(p => p.name.toLowerCase().includes(query));
+
+      const container = document.getElementById('marketProductsList');
+      if (!container) return;
+
+      container.innerHTML = list.map(p => `
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-800 rounded-xl flex items-center justify-center font-bold text-2xl shrink-0">
+              ${p.emoji}
+            </div>
+            <div>
+              <h4 class="font-extrabold text-xs text-gray-900">${p.name}</h4>
+              <span class="text-xs font-black text-emerald-700 block">$${p.price.toLocaleString('es-CO')} / kg</span>
+              <div class="flex items-center gap-2 text-[10px] text-gray-400 font-medium mt-0.5">
+                <span>👨‍🌾 ${p.seller}</span>
+                <span>•</span>
+                <span>📦 ${p.qty} kg disp.</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="toast('Solicitud de compra enviada al productor', 'success')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition shrink-0">
+            Comprar
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function filterMarketProducts() {
+      renderMarketProducts();
+    }
+
+    // SIMULADOR DE CRÉDITO AGRO-IMPULSO
+    function calculateCredit() {
+      const amount = parseFloat(document.getElementById('creditAmount').value) || 8000000;
+      const term = parseInt(document.getElementById('creditTerm').value) || 24;
+      
+      document.getElementById('creditAmountLabel').textContent = `$${amount.toLocaleString('es-CO')}`;
+
+      const monthlyRate = 0.0242; // 2.42%
+      const pmt = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -term));
+
+      document.getElementById('creditPayment').textContent = `$${Math.round(pmt).toLocaleString('es-CO')}`;
+    }
+
+    // CALCULADORA DE OPERACIÓN
+    function calculateOperationPrice() {
+      const qty = parseFloat(document.getElementById('calcQty').value) || 0;
+      const unitPrice = parseFloat(document.getElementById('calcUnitPrice').value) || 0;
+      const interestRate = (parseFloat(document.getElementById('calcInterest').value) || 0) / 100;
+
+      const baseVal = qty * unitPrice;
+      const interestVal = baseVal * interestRate;
+      const totalVal = baseVal + interestVal;
+
+      const transportVal = totalVal * 0.18; // 18%
+      const contactVal = totalVal * 0.10;   // 10%
+      const producerVal = totalVal - transportVal - contactVal;
+
+      document.getElementById('calcBaseVal').textContent = `$${Math.round(baseVal).toLocaleString('es-CO')}`;
+      document.getElementById('calcInterestVal').textContent = `$${Math.round(interestVal).toLocaleString('es-CO')}`;
+      document.getElementById('calcTotalVal').textContent = `$${Math.round(totalVal).toLocaleString('es-CO')}`;
+      document.getElementById('calcTransportVal').textContent = `$${Math.round(transportVal).toLocaleString('es-CO')}`;
+      document.getElementById('calcContactVal').textContent = `$${Math.round(contactVal).toLocaleString('es-CO')}`;
+      document.getElementById('calcProducerVal').textContent = `$${Math.round(producerVal).toLocaleString('es-CO')}`;
+    }
+
+    // LÓGICA ASISTENTE IA
+    function renderAIProducts() {
+      const container = document.getElementById('aiProductsContainer');
+      if (!container) return;
+
+      container.innerHTML = state.aiProducts.map((p, idx) => `
+        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
+          <input type="text" value="${p.name}" onchange="state.aiProducts[${idx}].name=this.value; runAIEstimation();" class="w-1/3 bg-white border border-gray-200 rounded-lg p-1.5 text-xs font-bold">
+          <input type="number" value="${p.qty}" oninput="state.aiProducts[${idx}].qty=parseFloat(this.value)||0; runAIEstimation();" placeholder="kg" class="w-1/4 bg-white border border-gray-200 rounded-lg p-1.5 text-xs font-bold">
+          <input type="number" value="${p.price}" oninput="state.aiProducts[${idx}].price=parseFloat(this.value)||0; runAIEstimation();" placeholder="$" class="w-1/3 bg-white border border-gray-200 rounded-lg p-1.5 text-xs font-bold">
+          <button onclick="removeAIProductRow(${idx})" class="text-red-500 hover:text-red-700 p-1">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function addAIProductRow() {
+      state.aiProducts.push({ name: 'Producto ' + (state.aiProducts.length + 1), qty: 50, price: 2000 });
+      renderAIProducts();
+      runAIEstimation();
+    }
+
+    function removeAIProductRow(index) {
+      state.aiProducts.splice(index, 1);
+      renderAIProducts();
+      runAIEstimation();
+    }
+
+    function runAIEstimation() {
+      const marginRate = (parseFloat(document.getElementById('aiMarginRate')?.value) || 15) / 100;
+      
+      let totalGross = 0;
+      let totalQty = 0;
+
+      state.aiProducts.forEach(p => {
+        totalGross += p.qty * p.price;
+        totalQty += p.qty;
+      });
+
+      const transport = totalGross * 0.18;
+      const contact = totalGross * 0.10;
+      const netProducer = totalGross - transport - contact;
+      const recommendedTotal = totalGross * (1 + marginRate);
+      const recommendedUnitPrice = totalQty > 0 ? Math.round(recommendedTotal / totalQty) : 0;
+
+      const container = document.getElementById('aiResultsCard');
+      if (!container) return;
+
+      container.innerHTML = `
+        <h4 class="text-xs font-bold text-purple-900 uppercase tracking-wider">Análisis Inteligente de Venta</h4>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
+            <span class="text-[10px] text-purple-700 font-bold block">Venta Bruta Estimada</span>
+            <span class="text-sm font-black text-purple-950">$${Math.round(totalGross).toLocaleString('es-CO')}</span>
+          </div>
+
+          <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+            <span class="text-[10px] text-emerald-700 font-bold block">Ingreso Neto Productor</span>
+            <span class="text-sm font-black text-emerald-950">$${Math.round(netProducer).toLocaleString('es-CO')}</span>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-3.5 rounded-xl space-y-1 shadow-md">
+          <span class="text-[10px] text-purple-200 font-bold uppercase block">Precio Sugerido IA por kg</span>
+          <div class="text-xl font-black">$${recommendedUnitPrice.toLocaleString('es-CO')} / kg</div>
+          <p class="text-[10px] text-purple-200/80">Cálculo optimizado para cubrir logística (18%) y garantizar tu margen del ${marginRate * 100}%.</p>
+        </div>
+      `;
+    }
+
+    // MODAL HANDLERS
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // PUBLICAR NUEVO PRODUCTO
+    function handlePublishProduct(e) {
+      e.preventDefault();
+      const name = document.getElementById('pubName').value;
+      const price = parseFloat(document.getElementById('pubPrice').value);
+      const qty = parseFloat(document.getElementById('pubQty').value);
+      const emoji = document.getElementById('pubEmoji').value;
+
+      marketProducts.unshift({
+        id: Date.now(),
+        name,
+        price,
+        qty,
+        seller: state.accountName || 'Mi Finca',
+        emoji,
+        rating: 5.0
+      });
+
+      renderMarketProducts();
+      closeModal('publishModal');
+      toast('¡Producto publicado exitosamente!', 'success');
+    }
+
+    // GESTIÓN DE PERFIL CON LOCALSTORAGE
+    function loadProfileToForm() {
+      const p = state.profile;
+      if (p.responsible) document.getElementById('profResponsible').value = p.responsible;
+      if (p.phone) document.getElementById('profPhone').value = p.phone;
+      if (p.location) document.getElementById('profLocation').value = p.location;
+      if (p.activity) document.getElementById('profActivity').value = p.activity;
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const name = document.getElementById('profAccountName').value.trim();
+      const responsible = document.getElementById('profResponsible').value.trim();
+      const phone = document.getElementById('profPhone').value.trim();
+      const location = document.getElementById('profLocation').value.trim();
+      const activity = document.getElementById('profActivity').value.trim();
+
+      state.accountName = name;
+      state.profile = { responsible, phone, location, activity };
+
+      localStorage.setItem('casaAgraria_accountName', name);
+      localStorage.setItem('casaAgraria_profile', JSON.stringify(state.profile));
+
+      applyRoleTheme();
+      toast('Perfil actualizado correctamente', 'success');
+    }
+
+    function switchRoleModal() {
+      document.getElementById('roleOverlay').classList.remove('hidden');
+    }
+
+    function logout() {
+      localStorage.clear();
+      location.reload();
+    }
+
+    // SISTEMA DE TOAST NOTIFICATION
+    function toast(message, type = 'info') {
+      const toastEl = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = message;
+
+      if (type === 'success') {
+        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+        toastIcon.className = 'w-4 h-4 text-emerald-400';
+      } else if (type === 'error') {
+        toastIcon.setAttribute('data-lucide', 'alert-circle');
+        toastIcon.className = 'w-4 h-4 text-red-400';
+      } else {
+        toastIcon.setAttribute('data-lucide', 'info');
+        toastIcon.className = 'w-4 h-4 text-blue-400';
+      }
+
+      lucide.createIcons();
+
+      toastEl.classList.remove('-translate-y-20', 'opacity-0');
+      toastEl.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toastEl.classList.remove('translate-y-0', 'opacity-100');
+        toastEl.classList.add('-translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
